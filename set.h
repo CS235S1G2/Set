@@ -3,19 +3,27 @@
 *    Set
 * Summary:
 *    This class contains the notion of a set: a container
-*    that follows First In Last Out and expands as more items are put inside.
+*    that holds exactly one of each item (no duplicates)
 *
 *    This will contain the class definition of:
 *        Set         : A class that holds stuff
+*        SetIterator : An interator through Set
 * Author
-*    Nathan Bench, Jed Billman, Justin Chandler, Jeremy Chandler (Oh Yeah!)
+*    Nathan Bench, Jed Billman, Justin Chandler, Jeremy Chandler
 ************************************************************************/
 
 #ifndef SET_H
 #define SET_H
 
 #include <cassert>
-#include <new>
+
+// forward declaration for SetIterator
+template <class T>
+class SetIterator;
+
+// forward declaration for SetConstIterator
+template <class T>
+class SetConstIterator;
 
 /************************************************
  * SET
@@ -26,7 +34,7 @@ class Set
 {
 public:
    // default constructor : empty and kinda useless
-   Set() : m_top(0), m_capacity(0), m_data(NULL) {}
+   Set() : numItems(0), max(0), data(NULL) {}
 
    // copy constructor : copy it
    Set(const Set & rhs) throw (const char *);
@@ -35,71 +43,183 @@ public:
    Set(int capacity) throw (const char *);
    
    // destructor : free everything
-   ~Set()        { if (m_capacity) delete [] m_data; }
+   ~Set()        { if (max) delete [] data; }
    
-   // is the container currently empty
-   bool empty() const  { return m_top == 0;         }
+   // standard container methods
+   bool empty() const   { return numItems == 0;         } 
+   void clear()         { numItems = 0;                 }
+   int capacity() const { return max;                   }
+   int size() const     { return numItems;              }
 
-   // remove all the items from the container
-   void clear()        { m_top = 0;                 }
-
-   // how many items can the set currently contain?
-   int capacity() const { return m_capacity;             }
-   
-   // how many items are currently in the container?
-   int size() const    { return m_top;              }
-
-   // increase the capacity
-   void increaseCapacity();
-
-   // add an item to the container
+   // SET specific methods
    void insert(const T & t) throw (const char *);
-
-   // Removes an item from the set
-   void erase() throw (const char *);
-
-   // Finds the item in the set
-   T & find() throw (const char *);
+   void erase(SetIterator <T> & it);
+   SetIterator <T> find(const T & t);
    
-   // union operator '||'
-   Set<T> & operator || (const Set <T> & rhs);
+   // operators
+   Set <T> & operator = (const Set <T> & rhs);
+   Set <T> operator || (const Set <T> & rhs);   // union
+   Set <T> operator && (const Set <T> & rhs);   // intersection
+   Set <T> operator - (const Set <T> & rhs);
    
-   // insertion operator '&&'
-   Set<T> & operator && (const Set <T> & rhs);
-
-   //returns an iterator to the first element in the set
-   int begin() throw (const char *);
-   // returns an iterator referring to the first element in the set
-   int end() throw (const char *);
+   // iterators
+   SetIterator <T> begin() { return SetIterator<T>(data); }
+   SetIterator <T> end() { return SetIterator<T>(data + numItems);}
    
+   SetConstIterator <T> cbegin() const { return SetConstIterator<T>(data); }
+   SetConstIterator <T> cend() const   { return SetConstIterator<T>(data + numItems); }
    
 private:
-   T * m_data;          // dynamically allocated array of T
-   int m_top;      // how many items are currently in the Set?
-   int m_capacity;      // how many items can I put on the Set before full?
+   T * data;          // dynamically allocated array of T
+   int numItems;      // how many items are currently in the Set?
+   int max;           // how many items can I put on the Set before full?
+   
+   int findIndex(const T & t);
+   void addToEnd(const T & t);
 };
 
+/**************************************************
+ * SET ITERATOR
+ * An iterator through Set
+ *************************************************/
+template <class T>
+class SetIterator
+{
+  public:
+   // default constructor
+  SetIterator() : p(NULL) {}
+
+   // initialize to direct p to some item
+  SetIterator(T * p) : p(p) {}
+
+   // copy constructor
+   SetIterator(const SetIterator & rhs) { *this = rhs; }
+
+   // assignment operator
+   SetIterator & operator = (const SetIterator & rhs)
+   {
+      this->p = rhs.p;
+      return *this;
+   }
+
+   // not equals operator
+   bool operator != (const SetIterator & rhs) const
+   {
+      return rhs.p != this->p;
+   }
+
+   // dereference operator
+   T & operator * ()
+   {
+      return *p;
+   }
+
+   // prefix increment
+   SetIterator <T> & operator ++ ()
+   {
+      p++;
+      return *this;
+   }
+
+   // postfix increment
+   SetIterator <T> operator++(int postfix)
+   {
+      SetIterator tmp(*this);
+      p++;
+      return tmp;
+   }
+   
+   SetIterator <T> & operator -- ()
+   {
+      p--;
+      return *this;
+   }
+   
+  private:
+   T * p;
+};
+
+/**************************************************
+ * SET CONST ITERATOR
+ * An iterator through Set
+ *************************************************/
+template <class T>
+class SetConstIterator
+{
+  public:
+   // default constructor
+  SetConstIterator() : p(NULL) {}
+
+   // initialize to direct p to some item
+  SetConstIterator(T * p) : p(p) {}
+
+   // copy constructor
+   SetConstIterator(const SetConstIterator & rhs) { *this = rhs; }
+
+   // assignment operator
+   SetConstIterator & operator = (const SetConstIterator & rhs)
+   {
+      this->p = rhs.p;
+      return *this;
+   }
+
+   // not equals operator
+   bool operator != (const SetConstIterator & rhs) const
+   {
+      return rhs.p != this->p;
+   }
+
+   // dereference operator
+   T & operator * () const
+   {
+      return *p;
+   }
+
+   // prefix increment
+   SetConstIterator <T> & operator ++ ()
+   {
+      p++;
+      return *this;
+   }
+
+   // postfix increment
+   SetConstIterator <T> operator++(int postfix)
+   {
+      SetConstIterator tmp(*this);
+      p++;
+      return tmp;
+   }
+   
+   SetConstIterator <T> & operator -- ()
+   {
+      p--;
+      return *this;
+   }
+   
+  private:
+   T * p;
+};
 
 /*******************************************
- * STACK :: COPY CONSTRUCTOR
+ * SET :: COPY CONSTRUCTOR
  *******************************************/
 template <class T>
 Set <T> :: Set(const Set <T> & rhs) throw (const char *)
 {
-   assert(rhs.m_capacity >= 0);
+   assert(rhs.max >= 0);
       
    // do nothing if there is nothing to do
-   if (rhs.m_capacity == 0)
+   if (rhs.max == 0)
    {
-      m_capacity = m_top = 0;
-      m_data = NULL;
+      max = numItems = 0;
+      data = NULL;
       return;
    }
 
    // attempt to allocate
    try
    {
-      m_data = new T[rhs.m_capacity];
+      data = new T[rhs.max];
    }
    catch (std::bad_alloc)
    {
@@ -107,21 +227,21 @@ Set <T> :: Set(const Set <T> & rhs) throw (const char *)
    }
    
    // copy over the capacity and size
-   assert(rhs.m_top >= 0 && rhs.m_top <= rhs.m_capacity);
-   m_capacity = rhs.m_capacity;
-   m_top = rhs.m_top;
+   assert(rhs.numItems >= 0 && rhs.numItems <= rhs.max);
+   max = rhs.max;
+   numItems = rhs.numItems;
 
    // copy the items over one at a time using the assignment operator
-   for (int i = 0; i < m_top; i++)
-      m_data[i] = rhs.m_data[i];
+   for (int i = 0; i < numItems; i++)
+      data[i] = rhs.data[i];
 
    // the rest needs to be filled with the default value for T
-   for (int i = m_top; i < m_capacity; i++)
-      m_data[i] = T();
+   for (int i = numItems; i < max; i++)
+      data[i] = T();
 }
 
 /**********************************************
- * STACK : NON-DEFAULT CONSTRUCTOR
+ * SET : NON-DEFAULT CONSTRUCTOR
  * Preallocate the container to "capacity"
  **********************************************/
 template <class T>
@@ -130,17 +250,17 @@ Set <T> :: Set(int capacity) throw (const char *)
    assert(capacity >= 0);
    
    // do nothing if there is nothing to do
-   if (m_capacity == 0)
+   if (max == 0)
    {
-      this->m_capacity = this->m_top = 0;
-      this->m_data = NULL;
+      this->max = this->numItems = 0;
+      this->data = NULL;
       return;
    }
 
    // attempt to allocate
    try
    {
-      m_data = new T[capacity];
+      data = new T[capacity];
    }
    catch (std::bad_alloc)
    {
@@ -149,80 +269,133 @@ Set <T> :: Set(int capacity) throw (const char *)
 
       
    // copy over the stuff
-   this->m_capacity = capacity;
-   this->m_top = 0;
+   this->max = capacity;
+   this->numItems = 0;
 
    // initialize the container by calling the default constructor
-   for (int i = 0; i < m_capacity; i++)
-      m_data[i] = T();
+   for (int i = 0; i < max; i++)
+      data[i] = T();
 }
 
 /***************************************************
-* STACK :: INCREASE CAPACITY
-* Allocate memory for m_data
-**************************************************/
-template<class T>
-void Set<T>::increaseCapacity()
+ * SET :: INSERT
+ * Sort an item then insert into container
+ **************************************************/
+template <class T>
+void Set <T> :: insert(const T & t) throw (const char *)
 {
-	int newCap = m_capacity * 2;
+   // IF capacity == 0
+   if (max == 0)
+   {
+      max = 1;
+      try
+      {
+         data = new T[max];
+      }
+      catch (std::bad_alloc)
+      {
+         throw "ERROR: unable to allocate a new buffer for Set";
+      }
+   }
    
-	if (m_capacity == 0)
-		newCap = 1;
+   // IF max capacity AND numItems is not less than 0
+   if (max == numItems && numItems > 0)
+   {
+      max *= 2;
+      try
+      {
+         T* tempArray = new T[max];
+         
+         // copy
+         for (int i = 0; i < numItems; i++)
+         {
+            tempArray[i] = data[i];
+         }
+
+         // free memory
+         delete[] data;
+
+         // point to tempArray
+         data = tempArray;
+      }
+      catch (std::bad_alloc)
+      {
+         throw "ERROR: Unable to allocate a new buffer for Set";
+      }
+   }
    
-	T *temp = new T[newCap];
-	for (int i = 0; i < m_capacity; ++i)
-	{
-		temp[i] = m_data[i];
-	}
+   int iInsert = findIndex(t);
+   if (data[iInsert] != t)
+      for (int i = numItems; i > iInsert; i--)
+         data[i + 1] = data[i];
+      
+      data[iInsert] = t;
+      numItems++;
+}
+
+/***************************************************
+ * SET :: ERASE
+ * Return an iterator if t is found, or return end.
+ * CITE: CS235 PDF Page 124
+ **************************************************/
+void Set <T> :: erase(SetIterator <T> & it)
+{
+   T t = *it;
+   int iErase = findIndex(t);
    
-	m_capacity = newCap;
-	delete[] m_data;
-	m_data = temp;
+   // IF the value exists at this index
+   if (data[iErase] == *it)
+      // start at the index and shift the upper array onto it
+      for (int i = iErase; i < numItems; i++)
+         data[i] = data[i + 1];
+      
+      numItems--;
 }
 
 /***************************************************
-* STACK :: PUSH
-* Adds an item to the top of the set
-**************************************************/
-template<class T>
-void Set<T>::push(const T & t) throw (const char *)
+ * SET :: FIND INDEX
+ * Return an int if t is found, or return end.
+ * CITE: Brother Jones DB05
+ **************************************************/
+int Set <T> :: findIndex(const T & t)
 {
-   // IF empty increase the capacity
-	if (empty() || m_capacity <= m_top)
-	{
-		increaseCapacity();
-	}
-	m_data[m_top] = t;
-	m_top++;
+   int iBegin = 0;
+   int iEnd = numItems - 1;
+   while(iBegin < iEnd)
+   {
+      iMid = (iBegin + iEnd) / 2;
+      
+      if (t == data[iMid])
+         return iMid;
+      
+      if (t < data[iMid)
+         iEnd = iMid - 1;
+      
+      if (t > data[iMid])
+         iBegin = iMid + 1;
+   }
+   
+   // t not found
+   return numItems;
 }
 
 /***************************************************
-* STACK :: POP
-* Removes an item from the end of the set, and reduces size by one
-**************************************************/
-template<class T>
-inline void Set<T>::pop() throw(const char *)
+ * SET :: FIND
+ * Return an iterator if t is found, or return end.
+ * CITE: Brother Jones DB05
+ **************************************************/
+SetIterator <T> Set <T> :: find(const T & t)
 {
-	if (empty())
-		throw "ERROR: Unable to pop from an empty Set";
-	m_top--;
+   int i = findIndex(t);
+   
+   if (i >= 0)
+      return SetIterator<T>(data + i);
+   else
+      return end();
 }
 
 /***************************************************
-* STACK :: TOP
-* Returns the item currently at the end of the set
-**************************************************/
-template<class T>
-inline T & Set<T>::top() const throw(const char *)
-{
-	// if empty: throw Unable to reference the element from an empty Set
-	if (empty() || (m_top < 0))
-		throw "ERROR: Unable to reference the element from an empty Set";
-	return m_data[m_top - 1];
-}
-
-/***************************************************
- * STACK :: =
+ * SET :: =
  * Overload assignment operator
  **************************************************/
  template <class T>
@@ -231,31 +404,92 @@ Set<T> & Set <T> :: operator = (const Set <T> & rhs)
    // don't copy yourself
    if (this != &rhs)
    {
-      // clean up m_data
-      if (m_data)
-         delete [] m_data;
+      // clean up data
+      if (data)
+         delete [] data;
       
       // assign each member variable to right-hand-side
-      m_capacity = rhs.m_capacity;
-      m_top = rhs.m_top;
+      max = rhs.max;
+      numItems = rhs.numItems;
       
       // allocate new array
       try
       {
-         m_data = new T[m_capacity];
+         data = new T[max];
       }
       catch (std::bad_alloc)
       {
          throw "ERROR: Unable to allocate a new buffer for Set";
       }
       // copy over values from rhs
-      for (int i = 0; i < rhs.m_top; i++)
+      for (int i = 0; i < rhs.numItems; i++)
       {
-         m_data[i] = rhs.m_data[i];
+         data[i] = rhs.data[i];
       }
       
       return *this;
    }
 }
 
-#endif // STACK_H
+/***************************************************
+ * SET :: UNION
+ * Overload || operator
+ **************************************************/
+Set <T> Set <T> :: operator || (const Set <T> & rhs)
+{
+   Set <T> setReturn;
+   iThis = 0;
+   iRhs = 0;
+   
+   while (iThis < numItems || iRhs < rhs.numItems)
+   {
+      if (iThis == numItems)
+         setReturn.addToEnd(rhs.data[iRhs++]);
+      else if (iRhs == rhs.numItems)
+         setReturn.addToEnd(data[iThis++]);
+      else if (data[iThis] == rhs.data[iRhs])
+      {
+         setReturn.addToEnd(data[iThis]);
+         iThis++;
+         iRhs++;
+      }
+      else if (data[iThis] < rhs.data[iRhs])
+         setReturn.addToEnd(data[iThis++]);
+      else
+         setReturn.addToEnd(rhs.data[iRhs++]);
+   }
+}
+
+/***************************************************
+ * SET :: INTERSECTION
+ * Overload && operator
+ **************************************************/
+Set <T> Set <T> :: operator && (const Set <T> & rhs)
+{
+   Set <T> setReturn;
+   iThis = 0;
+   iRhs = 0;
+   
+   while (iThis < numItems || iRhs < rhs.numItems)
+   {
+      if (iThis == numItems)
+         return setReturn;
+      else if (iRhs == rhs.numItems)
+         return setReturn;
+      else if (data[iThis] == rhs.data[iRhs])
+      {
+         setReturn.addToEnd(data[iThis]);
+         iThis++;
+         iRhs++;
+      }
+      else if (data[iThis] < rhs.data[iRhs])
+         iThis++;
+      else
+         iRhs++;
+   }   
+}
+
+Set <T> operator - (const Set <T> & rhs);
+
+#endif // SET_H
+
