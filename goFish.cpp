@@ -65,5 +65,4 @@ void goFish()           // TODO change to goFish()
 	cout << "We will play 5 rounds of Go Fish. Guess the card in the hand";
 	readFile();
 	display();
-	return 0;
 }

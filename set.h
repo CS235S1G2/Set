@@ -338,6 +338,7 @@ void Set <T> :: insert(const T & t) throw (const char *)
  * Return an iterator if t is found, or return end.
  * CITE: CS235 PDF Page 124
  **************************************************/
+template <class T>
 void Set <T> :: erase(SetIterator <T> & it)
 {
    T t = *it;
@@ -357,18 +358,19 @@ void Set <T> :: erase(SetIterator <T> & it)
  * Return an int if t is found, or return end.
  * CITE: Brother Jones DB05
  **************************************************/
+template <class T>
 int Set <T> :: findIndex(const T & t)
 {
    int iBegin = 0;
    int iEnd = numItems - 1;
-   while(iBegin < iEnd)
+   while (iBegin < iEnd)
    {
-      iMid = (iBegin + iEnd) / 2;
-      
-      if (t == data[iMid])
-         return iMid;
-      
-      if (t < data[iMid)
+	   iMid = (iBegin + iEnd) / 2;
+
+	   if (t == data[iMid])
+		   return iMid;
+
+	   if (t < data[iMid])
          iEnd = iMid - 1;
       
       if (t > data[iMid])
@@ -384,6 +386,7 @@ int Set <T> :: findIndex(const T & t)
  * Return an iterator if t is found, or return end.
  * CITE: Brother Jones DB05
  **************************************************/
+template <class T>
 SetIterator <T> Set <T> :: find(const T & t)
 {
    int i = findIndex(t);
@@ -435,6 +438,7 @@ Set<T> & Set <T> :: operator = (const Set <T> & rhs)
  * SET :: UNION
  * Overload || operator
  **************************************************/
+template <class T>
 Set <T> Set <T> :: operator || (const Set <T> & rhs)
 {
    Set <T> setReturn;
@@ -464,6 +468,7 @@ Set <T> Set <T> :: operator || (const Set <T> & rhs)
  * SET :: INTERSECTION
  * Overload && operator
  **************************************************/
+template <class T>
 Set <T> Set <T> :: operator && (const Set <T> & rhs)
 {
    Set <T> setReturn;
@@ -488,7 +493,7 @@ Set <T> Set <T> :: operator && (const Set <T> & rhs)
          iRhs++;
    }   
 }
-
+template <class T>
 Set <T> operator - (const Set <T> & rhs);
 
 #endif // SET_H
