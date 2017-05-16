@@ -11,8 +11,8 @@
 #define GO_FISH_H
 
 #include <set> // for SET
-
-
+#include "card.h"
+#include <fstream>
 
 
 #endif // GO_FISH_H
