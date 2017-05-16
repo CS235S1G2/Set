@@ -111,6 +111,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\card.cpp" />
+    <ClCompile Include="..\goFish.cpp" />
+    <ClCompile Include="..\week05.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\card.h" />
+    <ClInclude Include="..\goFish.h" />
+    <ClInclude Include="..\set.h" />
+    <ClInclude Include="..\stack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
