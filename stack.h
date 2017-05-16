@@ -8,7 +8,7 @@
 *    This will contain the class definition of:
 *        Stack         : A class that holds stuff
 * Author
-*    Nathan Bench, Jed Billman, Justin Chandler, Jeremy Chandler
+*    Nathan Bench, Jed Billman, Justin Chandler, Jeremy Chandler (Oh Yeah!)
 ************************************************************************/
 
 #ifndef STACK_H
