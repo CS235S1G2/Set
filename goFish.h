@@ -16,11 +16,15 @@
  /*****************************************
  * GO FISH
  *****************************************/
-void goFish();
+void readFile();
 bool verifyMatch();
 void display();
 int numMatches;
 int roundNumber;
+std::set<Card>deck;
+Card newCard;
+char * cardGuess;
+void goFish();
 
 
 #endif // GO_FISH_H
