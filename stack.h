@@ -151,7 +151,7 @@ Stack <T> :: Stack(int capacity) throw (const char *)
 
 /***************************************************
 * STACK :: INCREASE CAPACITY
-* Allocate memory for m_data Hello
+* Allocate memory for m_data
 **************************************************/
 template<class T>
 void Stack<T>::increaseCapacity()
