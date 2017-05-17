@@ -76,6 +76,7 @@ private:
    
    int findIndex(const T & t);
    void addToEnd(const T & t);
+   void resize(int newCap) throw (const char *);
 };
 
 /**************************************************
@@ -284,53 +285,51 @@ Set <T> :: Set(int capacity) throw (const char *)
 template <class T>
 void Set <T> :: insert(const T & t) throw (const char *)
 {
-   // IF capacity == 0
-   if (max == 0)
+   if (max == 0 || max == numItems && numItems > 0)
    {
-      max = 1;
-      try
-      {
-         data = new T[max];
-      }
-      catch (std::bad_alloc)
-      {
-         throw "ERROR: unable to allocate a new buffer for Set";
-      }
+      resize(max);
    }
    
-   // IF max capacity AND numItems is not less than 0
-   if (max == numItems && numItems > 0)
-   {
-      max *= 2;
-      try
-      {
-         T* tempArray = new T[max];
-         
-         // copy
-         for (int i = 0; i < numItems; i++)
-         {
-            tempArray[i] = data[i];
-         }
-
-         // free memory
-         delete[] data;
-
-         // point to tempArray
-         data = tempArray;
-      }
-      catch (std::bad_alloc)
-      {
-         throw "ERROR: Unable to allocate a new buffer for Set";
-      }
-   }
    
    int iInsert = findIndex(t);
-   if (data[iInsert] != t)
+   
+   if (empty())
+   {
+      data[iInsert] = t;
+      numItems++;
+   } 
+   else if (data[iInsert] == numItems || data[iInsert] != t) // this doesn't appear to be catching duplicates (data[iInsert] != t)
+   {      
+      // shift the array
       for (int i = numItems; i > iInsert; i--)
          data[i + 1] = data[i];
       
       data[iInsert] = t;
       numItems++;
+   }
+   /*SetIterator <T> iInsert = find(t);
+   if (empty())
+      data[numItems++] = t;
+   else if (*iInsert != t)
+   {
+      for (int i = numItems;)
+      {
+      }
+   }*/
+}
+
+/***************************************************
+ * SET :: ADD TO END
+ * Add to the end of the array
+ * CITE: CS235 PDF Page 124
+ **************************************************/
+template <class T>
+ void Set <T> :: addToEnd(const T & t)
+{
+   if (max == numItems)
+      resize(max * 2);
+   
+   data[numItems++] = t;
 }
 
 /***************************************************
@@ -339,7 +338,7 @@ void Set <T> :: insert(const T & t) throw (const char *)
  * CITE: CS235 PDF Page 124
  **************************************************/
 template <class T>
-void Set <T> :: erase(SetIterator <T> & it)
+ void Set <T> :: erase(SetIterator <T> & it)
 {
    T t = *it;
    int iErase = findIndex(t);
@@ -359,19 +358,18 @@ void Set <T> :: erase(SetIterator <T> & it)
  * CITE: Brother Jones DB05
  **************************************************/
 template <class T>
-int Set <T> :: findIndex(const T & t)
+ int Set <T> :: findIndex(const T & t)
 {
-   int iMid = 0;
    int iBegin = 0;
    int iEnd = numItems - 1;
-   while (iBegin < iEnd)
+   while(iBegin < iEnd)
    {
-	   iMid = (iBegin + iEnd) / 2;
-
-	   if (t == data[iMid])
-		   return iMid;
-
-	   if (t < data[iMid])
+      int iMid = (iBegin + iEnd) / 2;
+      
+      if (t == data[iMid])
+         return iMid;
+      
+      if (t < data[iMid])
          iEnd = iMid - 1;
       
       if (t > data[iMid])
@@ -402,7 +400,7 @@ SetIterator <T> Set <T> :: find(const T & t)
  * SET :: =
  * Overload assignment operator
  **************************************************/
- template <class T>
+template <class T>
 Set<T> & Set <T> :: operator = (const Set <T> & rhs)
 {
    // don't copy yourself
@@ -443,8 +441,8 @@ template <class T>
 Set <T> Set <T> :: operator || (const Set <T> & rhs)
 {
    Set <T> setReturn;
-   iThis = 0;
-   iRhs = 0;
+   int iThis = 0;
+   int iRhs = 0;
    
    while (iThis < numItems || iRhs < rhs.numItems)
    {
@@ -494,8 +492,44 @@ Set <T> Set <T> :: operator && (const Set <T> & rhs)
          iRhs++;
    }   
 }
+
+/*template <class T>
+Set <T> operator - (const Set <T> & rhs)
+{
+   return Set <T> r;
+}*/
+
+/***************************************************
+ * SET :: RESIZE
+ * Overload && operator
+ **************************************************/
 template <class T>
-Set <T> operator - (const Set <T> & rhs);
+void Set <T> :: resize(int newCap) throw (const char *)
+{
+   if (newCap <= 0 || newCap < max)
+      newCap = (max ? max * 2 : 1);
+
+   try
+   {
+      T* tempArray = new T[max];
+      
+      // copy
+      for (int i = 0; i < numItems; i++)
+      {
+         tempArray[i] = data[i];
+      }
+
+      // free memory
+      delete[] data;
+
+      // point to tempArray
+      data = tempArray;
+   }
+   catch (std::bad_alloc)
+   {
+      throw "ERROR: Unable to allocate a new buffer for Set";
+   }
+}
 
 #endif // SET_H
 
