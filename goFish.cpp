@@ -7,62 +7,78 @@
  *    Nathan Bench, Jed Billman, Jeremy Chandler (Leonel Messi), Justin Chandler
  **********************************************************************/
 
-#include <iostream>     // for ISTREAM, OSTREAM, CIN, and COUT
-#include <string>       // for STRING
-#include <cassert>      // for ASSERT
+
 #include "goFish.h" 
-#include <set> // for DEQUE
+#include <string>
 using namespace std;
 
+int numMatches;
+int roundNumber;
+string cardGuess;
+Card newCard;
+Set<Card>deck;
 
 // Verifies if the card drawn is a match with a card in the hand
 bool verifyMatch()
 {
-	if (deck.find(newCard) != deck.end())
+   SetIterator <Card> it = deck.find(newCard);
+   if (it != deck.end())
 	{
+	   deck.erase(it);
 		return true;
 	}
+        else
+           return false;
 }
 
 // displays all output
 void display()
 {
-	cout << "round " << roundNumber << ":"; 
-	cin >> cardGuess;
-	newCard = cardGuess;
-	
 	// Play game for 5 rounds
 	for (roundNumber; roundNumber <= 5; roundNumber++)
 	{
-		if (verifyMatch())
+	cout << "round " << roundNumber << ":"; 
+	cin >> cardGuess;
+    const char* tmp = cardGuess.c_str();
+	newCard = tmp;
+		if (verifyMatch() == true)
 		{
+			cout << "You got a match!\n";
 			numMatches++;
 		}
-		if (numMatches == 1)
-			cout << "You got a match!";
-		if (numMatches > 1)
-			cout << "Your have " << numMatches << "matches!";
-		cout << "The remaining cards: "; // TODO move through the iterator displaying the remaining cards
+		else
+			cout << "Go Fish!\n";
 	}
+		cout << "Your have " << numMatches << " matches!\n";
+		cout << "The remaining cards: ";
+		for (SetIterator <Card> it = deck.begin(); it != deck.end(); it++)
+			cout << *it << ", "; // TODO fix formatting.
+		cout << endl;
 }
 
 void readFile()
 {
-	fstream myfile("test.txt");
-	if (myfile.is_open())
+	ifstream fin("/home/cs235/week05/hand.txt");
+	if (fin.fail())
 	{
-		while (myfile >> newCard)
-			deck.insert(newCard);
+		cerr << "Failed to read file\n";
+		return;
 	}
-	myfile.close();
+
+		while (fin >> newCard)
+		{
+			deck.insert(newCard);
+		}
+	fin.close();
 }
 
 // Main function for the game
 void goFish()           // TODO change to goFish()
 {
 	numMatches = 0;
-	roundNumber = 0;
-	cout << "We will play 5 rounds of Go Fish. Guess the card in the hand";
+	roundNumber = 1;
+	cout << "We will play 5 rounds of Go Fish. Guess the card in the hand\n";
 	readFile();
 	display();
 }
+

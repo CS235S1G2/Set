@@ -10,21 +10,21 @@
 #ifndef GO_FISH_H
 #define GO_FISH_H
 
-#include <set> // for SET
-#include "card.h"
+#include <iostream>     // for ISTREAM, OSTREAM, CIN, and COUT
+#include <string>       // for STRING
+#include <cassert>      // for ASSERT
+#include "set.h"        // for SET
 #include <fstream>
+#include "card.h"
  /*****************************************
  * GO FISH
  *****************************************/
+
+void goFish();
 void readFile();
 bool verifyMatch();
 void display();
-int numMatches;
-int roundNumber;
-std::set<Card>deck;
-Card newCard;
-char * cardGuess;
-void goFish();
+
 
 
 #endif // GO_FISH_H

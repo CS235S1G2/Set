@@ -361,6 +361,7 @@ void Set <T> :: erase(SetIterator <T> & it)
 template <class T>
 int Set <T> :: findIndex(const T & t)
 {
+   int iMid = 0;
    int iBegin = 0;
    int iEnd = numItems - 1;
    while (iBegin < iEnd)
@@ -472,8 +473,8 @@ template <class T>
 Set <T> Set <T> :: operator && (const Set <T> & rhs)
 {
    Set <T> setReturn;
-   iThis = 0;
-   iRhs = 0;
+   int iThis = 0;
+   int iRhs = 0;
    
    while (iThis < numItems || iRhs < rhs.numItems)
    {
