@@ -285,20 +285,22 @@ Set <T> :: Set(int capacity) throw (const char *)
 template <class T>
 void Set <T> :: insert(const T & t) throw (const char *)
 {
-   if (max == 0 || max == numItems && numItems > 0)
+   int iInsert = findIndex(t);    
+   // IF the value is found
+   if (iInsert != numItems)
+      return;
+   
+   if (max == 0 || max == numItems)
    {
       resize(max);
    }
    
-   
-   int iInsert = findIndex(t);
-   
    if (empty())
    {
-      data[iInsert] = t;
-      numItems++;
+      data[numItems++] = t;
    } 
-   else if (data[iInsert] == numItems || data[iInsert] != t) // this doesn't appear to be catching duplicates (data[iInsert] != t)
+   
+   if (data[iInsert] != t) // this doesn't appear to be catching duplicates (data[iInsert] != t)
    {      
       // shift the array
       for (int i = numItems; i > iInsert; i--)
@@ -307,15 +309,6 @@ void Set <T> :: insert(const T & t) throw (const char *)
       data[iInsert] = t;
       numItems++;
    }
-   /*SetIterator <T> iInsert = find(t);
-   if (empty())
-      data[numItems++] = t;
-   else if (*iInsert != t)
-   {
-      for (int i = numItems;)
-      {
-      }
-   }*/
 }
 
 /***************************************************
@@ -506,7 +499,46 @@ Set <T> operator - (const Set <T> & rhs)
 template <class T>
 void Set <T> :: resize(int newCap) throw (const char *)
 {
-   if (newCap <= 0 || newCap < max)
+   // IF capacity == 0
+   if (max == 0)
+   {
+      max = 1;
+      try
+      {
+         data = new T[max];
+      }
+      catch (std::bad_alloc)
+      {
+         throw "ERROR: unable to allocate a new buffer for Vector";
+      }
+   }
+   
+   // IF max capacity AND numItems is not less than 0
+   if (max == numItems && numItems > 0)
+   {
+      max *= 2;
+      try
+      {
+         T* tempArray = new T[max];
+         
+         // copy
+         for (int i = 0; i < numItems; i++)
+         {
+            tempArray[i] = data[i];
+         }
+
+         // free memory
+         delete[] data;
+
+         // point to tempArray
+         data = tempArray;
+      }
+      catch (std::bad_alloc)
+      {
+         throw "ERROR: Unable to allocate a new buffer for Vector";
+      }
+   }
+   /*if (newCap <= 0 || newCap <= max)
       newCap = (max ? max * 2 : 1);
 
    try
@@ -528,7 +560,7 @@ void Set <T> :: resize(int newCap) throw (const char *)
    catch (std::bad_alloc)
    {
       throw "ERROR: Unable to allocate a new buffer for Set";
-   }
+   }*/
 }
 
 #endif // SET_H
