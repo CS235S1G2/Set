@@ -74,7 +74,7 @@ private:
    int numItems;      // how many items are currently in the Set?
    int max;           // how many items can I put on the Set before full?
    
-   int findIndex(const T & t);
+   int findIndex(const T & t, bool isInsert = false);
    void addToEnd(const T & t);
    void resize(int newCap) throw (const char *);
 };
@@ -285,30 +285,27 @@ Set <T> :: Set(int capacity) throw (const char *)
 template <class T>
 void Set <T> :: insert(const T & t) throw (const char *)
 {
-   int iInsert = findIndex(t);    
+   int iInsert = findIndex(t, true);    
    // IF the value is found
-   if (iInsert != numItems)
-      return;
+   /*if (iInsert != numItems)
+      return;*/
    
    if (max == 0 || max == numItems)
    {
       resize(max);
    }
    
-   if (empty())
-   {
-      data[numItems++] = t;
-   } 
-   
-   if (data[iInsert] != t) // this doesn't appear to be catching duplicates (data[iInsert] != t)
+   if (t != data[iInsert]) // this doesn't appear to be catching duplicates (data[iInsert] != t)
    {      
       // shift the array
-      for (int i = numItems; i > iInsert; i--)
+      for (int i = numItems; i >= iInsert; i--)
          data[i + 1] = data[i];
       
       data[iInsert] = t;
       numItems++;
    }
+   else
+      return;
 }
 
 /***************************************************
@@ -351,7 +348,7 @@ template <class T>
  * CITE: Brother Jones DB05
  **************************************************/
 template <class T>
- int Set <T> :: findIndex(const T & t)
+ int Set <T> :: findIndex(const T & t, bool isInsert /*= false*/)
 {
    int iBegin = 0;
    int iEnd = numItems - 1;
@@ -359,8 +356,9 @@ template <class T>
    {
       int iMid = (iBegin + iEnd) / 2;
       
-      if (t == data[iMid])
-         return iMid;
+      if (!isInsert)
+         if (t == data[iMid])
+            return iMid;
       
       if (t < data[iMid])
          iEnd = iMid - 1;
@@ -370,7 +368,7 @@ template <class T>
    }
    
    // t not found
-   return numItems;
+   return (isInsert ? iBegin : numItems);
 }
 
 /***************************************************
