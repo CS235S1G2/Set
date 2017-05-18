@@ -78,6 +78,13 @@ private:
    int findIndex(const T & t);
    void addToEnd(const T & t);
    void resize(int newCap) throw (const char *);
+   void display()
+   {
+      for (int i = 0; i < numItems; i++)
+      {
+         std::cout << "i: " << i << "\tvalue: " << data[i] << std::endl;
+      }
+   }
    
 };
 
@@ -294,7 +301,7 @@ void Set <T> :: insert(const T & t) throw (const char *)
       return;
    }
    
-   if (findIndex(t) != numItems)
+   if (findIndex(t) != -1)
       return;
    
    int iInsert = findInsertIndex(t);
@@ -379,19 +386,16 @@ template <class T>
 {
    T t = *it;
    int iErase = findIndex(t);
-   
-   if (t > data[iErase])
-   {
-      while (t > data[iErase] && iErase < numItems)
-         iErase++;
-   }
+   if (iErase == -1)
+      return;
+   assert(iErase < numItems && iErase >= 0);
    
    // IF the value exists at this index
    if (data[iErase] == *it)
    {
       // start at the index and shift the upper array onto it
       for (int i = iErase; i < numItems; i++)
-         data[i] = data[i + 1]; 
+         data[i] = data[i + 1]; // SEG FAULT
       numItems--;      
    }
 
@@ -409,10 +413,10 @@ template <class T>
 {
    int iBegin = 0;
    int iEnd = numItems - 1;
-   while(iBegin < iEnd)
+   while(iBegin <= iEnd)
    {
       int iMid = (iBegin + iEnd) / 2;
-      
+      //std::cout << "data[mid] == " << data[iMid] << "\tT == " << t << std::endl;
       if (t == data[iMid])
          return iMid;
       
@@ -424,7 +428,7 @@ template <class T>
    }
    
    // t not found
-   return numItems;
+   return -1;
 }
 
 /***************************************************
@@ -436,18 +440,11 @@ template <class T>
 SetIterator <T> Set <T> :: find(const T & t)
 {
    int i = findIndex(t);
-   
-   // verify index
-   if (t > data[i])
-   {
-      while (t > data[i] && i < numItems)
-         i++;
-   }
-   
-   if (i >= 0)
-      return SetIterator<T>(data + i);
-   else
+  
+   if (i == -1)
       return end();
+   else
+      return SetIterator<T>(data + i);
 }
 
 /***************************************************
