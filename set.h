@@ -74,9 +74,11 @@ private:
    int numItems;      // how many items are currently in the Set?
    int max;           // how many items can I put on the Set before full?
    
+   int findInsertIndex(const T & t);
    int findIndex(const T & t);
    void addToEnd(const T & t);
    void resize(int newCap) throw (const char *);
+   
 };
 
 /**************************************************
@@ -285,30 +287,69 @@ Set <T> :: Set(int capacity) throw (const char *)
 template <class T>
 void Set <T> :: insert(const T & t) throw (const char *)
 {
-   int iInsert = findIndex(t);    
-   // IF the value is found
-   if (iInsert != numItems)
+   if (data == NULL)
+   {
+      resize(max);
+      data[numItems++] = t;
       return;
+   }
+   
+   if (findIndex(t) != numItems)
+      return;
+   
+   int iInsert = findInsertIndex(t);
+   //std::cout << "iInsert: " << iInsert << std::endl;
    
    if (max == 0 || max == numItems)
    {
       resize(max);
    }
-   
-   if (empty())
+
+   // Verify Index
+   if (t > data[iInsert])
    {
-      data[numItems++] = t;
-   } 
+      while (t > data[iInsert] && iInsert < numItems)
+         {
+            iInsert++;
+         }   
+   }  
    
-   if (data[iInsert] != t) // this doesn't appear to be catching duplicates (data[iInsert] != t)
-   {      
+   if (t != data[iInsert])
+   {
+      if (max == numItems)
+         resize(max);
       // shift the array
-      for (int i = numItems; i > iInsert; i--)
+      for (int i = numItems; i >= iInsert; i--)
          data[i + 1] = data[i];
       
       data[iInsert] = t;
       numItems++;
    }
+}
+
+/***************************************************
+ * SET :: FIND INSERT INDEX
+ * Return an int if t is found, or return end.
+ * CITE: Brother Jones DB05
+ **************************************************/
+template <class T>
+ int Set <T> :: findInsertIndex(const T & t)
+{
+   int iBegin = 0;
+   int iEnd = numItems - 1;
+   while(iBegin < iEnd)
+   {
+      int iMid = (iBegin + iEnd) / 2;
+      
+      if (t < data[iMid])
+         iEnd = iMid - 1;
+      
+      if (t > data[iMid])
+         iBegin = iMid + 1;
+   }
+   
+   // t not found
+   return iBegin;
 }
 
 /***************************************************
