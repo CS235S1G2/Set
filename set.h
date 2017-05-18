@@ -311,15 +311,6 @@ void Set <T> :: insert(const T & t) throw (const char *)
    {
       resize(max);
    }
-
-   // Verify Index
-   if (t > data[iInsert])
-   {
-      while (t > data[iInsert] && iInsert < numItems)
-         {
-            iInsert++;
-         }   
-   }  
    
    if (t != data[iInsert])
    {
@@ -330,7 +321,7 @@ void Set <T> :: insert(const T & t) throw (const char *)
          //std::cout << "i: " << i << std::endl;        
             data[i + 1] = data[i];
       }
-         
+      
       
       data[iInsert] = t;
       numItems++;
@@ -347,7 +338,7 @@ template <class T>
 {
    int iBegin = 0;
    int iEnd = numItems - 1;
-   while(iBegin < iEnd)
+   while(iBegin <= iEnd)
    {
       int iMid = (iBegin + iEnd) / 2;
       
@@ -390,17 +381,12 @@ template <class T>
       return;
    assert(iErase < numItems && iErase >= 0);
    
-   // IF the value exists at this index
-   if (data[iErase] == *it)
-   {
-      // start at the index and shift the upper array onto it
-      for (int i = iErase; i < numItems; i++)
-         data[i] = data[i + 1]; // SEG FAULT
-      numItems--;      
-   }
 
-      
-      
+      // start at the index and shift the upper array onto it
+      assert(iErase != -1);
+      for (int i = iErase; i < (numItems - 1); i++)
+         data[i] = data[i + 1]; 
+      numItems--;            
 }
 
 /***************************************************
