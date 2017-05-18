@@ -78,6 +78,7 @@ private:
    int findIndex(const T & t);
    void addToEnd(const T & t);
    void resize(int newCap) throw (const char *);
+   // for debugging
    void display()
    {
       for (int i = 0; i < numItems; i++)
@@ -531,11 +532,36 @@ Set <T> Set <T> :: operator && (const Set <T> & rhs)
    }   
 }
 
-/*template <class T>
-Set <T> operator - (const Set <T> & rhs)
+/***************************************************
+ * SET :: DIFFERENCE
+ * Overload - operator
+ **************************************************/
+template <class T>
+Set <T> Set <T> :: operator - (const Set <T> & rhs)
 {
-   return Set <T> r;
-}*/
+   Set <T> setReturn;
+   int iThis = 0;
+   int iRhs = 0;
+   
+   while (iThis < numItems || iRhs < rhs.numItems)
+   {
+      if (iThis == numItems)
+         return setReturn;
+      else if (iRhs == rhs.numItems)
+         setReturn.addToEnd(data[iThis++]);
+      else if (data[iThis] == rhs.data[iRhs])
+      {
+         // skip equal values
+         iThis++;
+         iRhs++;
+      }
+      else if (data[iThis] < rhs.data[iRhs])
+         setReturn.addToEnd(data[iThis++]);
+      else
+          iRhs++;
+   }
+   return setReturn;
+}
 
 /***************************************************
  * SET :: RESIZE
@@ -554,7 +580,7 @@ void Set <T> :: resize(int newCap) throw (const char *)
       }
       catch (std::bad_alloc)
       {
-         throw "ERROR: unable to allocate a new buffer for Vector";
+         throw "ERROR: unable to allocate a new buffer for Set";
       }
    }
    
@@ -580,32 +606,9 @@ void Set <T> :: resize(int newCap) throw (const char *)
       }
       catch (std::bad_alloc)
       {
-         throw "ERROR: Unable to allocate a new buffer for Vector";
+         throw "ERROR: Unable to allocate a new buffer for Set";
       }
    }
-   /*if (newCap <= 0 || newCap <= max)
-      newCap = (max ? max * 2 : 1);
-
-   try
-   {
-      T* tempArray = new T[max];
-      
-      // copy
-      for (int i = 0; i < numItems; i++)
-      {
-         tempArray[i] = data[i];
-      }
-
-      // free memory
-      delete[] data;
-
-      // point to tempArray
-      data = tempArray;
-   }
-   catch (std::bad_alloc)
-   {
-      throw "ERROR: Unable to allocate a new buffer for Set";
-   }*/
 }
 
 #endif // SET_H
