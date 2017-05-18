@@ -316,11 +316,14 @@ void Set <T> :: insert(const T & t) throw (const char *)
    
    if (t != data[iInsert])
    {
-      if (max == numItems)
-         resize(max);
       // shift the array
-      for (int i = numItems; i >= iInsert; i--)
-         data[i + 1] = data[i];
+      if (numItems)
+      for (int i = numItems - 1; i >= iInsert; i--)
+      {
+         //std::cout << "i: " << i << std::endl;        
+            data[i + 1] = data[i];
+      }
+         
       
       data[iInsert] = t;
       numItems++;
@@ -377,13 +380,23 @@ template <class T>
    T t = *it;
    int iErase = findIndex(t);
    
+   if (t > data[iErase])
+   {
+      while (t > data[iErase] && iErase < numItems)
+         iErase++;
+   }
+   
    // IF the value exists at this index
    if (data[iErase] == *it)
+   {
       // start at the index and shift the upper array onto it
       for (int i = iErase; i < numItems; i++)
-         data[i] = data[i + 1];
+         data[i] = data[i + 1]; 
+      numItems--;      
+   }
+
       
-      numItems--;
+      
 }
 
 /***************************************************
@@ -423,6 +436,13 @@ template <class T>
 SetIterator <T> Set <T> :: find(const T & t)
 {
    int i = findIndex(t);
+   
+   // verify index
+   if (t > data[i])
+   {
+      while (t > data[i] && i < numItems)
+         i++;
+   }
    
    if (i >= 0)
       return SetIterator<T>(data + i);
