@@ -37,23 +37,27 @@ void display()
 	// Play game for 5 rounds
 	for (roundNumber; roundNumber <= 5; roundNumber++)
 	{
-	cout << "round " << roundNumber << ":"; 
+	cout << "round " << roundNumber << ": "; 
 	cin >> cardGuess;
     const char* tmp = cardGuess.c_str();
 	newCard = tmp;
 		if (verifyMatch() == true)
 		{
-			cout << "You got a match!\n";
+			cout << "\tYou got a match!\n";
 			numMatches++;
 		}
 		else
-			cout << "Go Fish!\n";
+			cout << "\tGo Fish!\n";
 	}
-		cout << "Your have " << numMatches << " matches!\n";
+		cout << "You have " << numMatches << " matches!\n";
 		cout << "The remaining cards: ";
-		for (SetIterator <Card> it = deck.begin(); it != deck.end(); it++)
-			cout << *it << ", "; // TODO fix formatting.
-		cout << endl;
+		for (SetIterator <Card> it = deck.begin(); it != deck.end();)
+		{
+			cout << *it;
+			if (++it != deck.end())
+				cout << ", "; // TODO fix formatting.
+		}
+			cout << endl;
 }
 
 void readFile()
@@ -77,7 +81,7 @@ void goFish()           // TODO change to goFish()
 {
 	numMatches = 0;
 	roundNumber = 1;
-	cout << "We will play 5 rounds of Go Fish. Guess the card in the hand\n";
+	cout << "We will play 5 rounds of Go Fish.  Guess the card in the hand\n";
 	readFile();
 	display();
 }

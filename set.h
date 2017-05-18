@@ -498,6 +498,7 @@ Set <T> Set <T> :: operator || (const Set <T> & rhs)
       else
          setReturn.addToEnd(rhs.data[iRhs++]);
    }
+   return setReturn;
 }
 
 /***************************************************
